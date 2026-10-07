@@ -17,6 +17,7 @@ def get_db_connection():
     # Render busca automáticamente la variable 'DATABASE_URL' en la nube
     database_url = os.environ.get("DATABASE_URL")
 
+<<<<<<< HEAD
     if database_url:
         # Conexión automática cuando está publicado en Render
         conn = psycopg2.connect(database_url, cursor_factory=RealDictCursor)
@@ -30,6 +31,58 @@ def get_db_connection():
             cursor_factory=RealDictCursor,
         )
     return conn
+=======
+  if database_url:
+    # Conexión automática cuando está publicado en Render
+    conn = psycopg2.connect(database_url, cursor_factory=RealDictCursor)
+  else:
+    # Conexión local para cuando lo pruebes en tu propia computadora
+    conn = psycopg2.connect(
+        host="localhost",
+        database="db_asistencias_jjsz",  # El nombre que te dio Render
+        user="db_asistencias_jjsz_user",  # El usuario que te dio Render
+        password="",  # Pon tu contraseña local de postgres si la usas en tu compu
+        cursor_factory=RealDictCursor,
+    )
+  return conn
+def init_db():
+    conn = get_db_connection()
+    cur = conn.cursor()
+    
+    # Crear tabla de eventos si no existe
+    cur.execute('''
+        CREATE TABLE IF NOT EXISTS eventos (
+            id SERIAL PRIMARY KEY,
+            titulo VARCHAR(150) NOT NULL,
+            descripcion TEXT,
+            fecha_evento TIMESTAMP NOT NULL,
+            periodo VARCHAR(20) NOT NULL,
+            token_qr VARCHAR(100) UNIQUE NOT NULL,
+            creado_en TIMESTAMP WITHOUT TIME ZONE DEFAULT CURRENT_TIMESTAMP
+        );
+    ''')
+    
+    # Crear tabla de asistencias si no existe
+    cur.execute('''
+        CREATE TABLE IF NOT EXISTS asistencias (
+            id SERIAL PRIMARY KEY,
+            evento_id INTEGER REFERENCES eventos(id) ON DELETE CASCADE,
+            nombre_alumno VARCHAR(150) NOT NULL,
+            correo_alumno VARCHAR(150) NOT NULL,
+            carrera VARCHAR(100) NOT NULL,
+            fecha_registro TIMESTAMP WITHOUT TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+            ip_dispositivo VARCHAR(50),
+            CONSTRAINT unique_asistencia_evento UNIQUE (evento_id, correo_alumno)
+        );
+    ''')
+    
+    conn.commit()
+    cur.close()
+    conn.close()
+
+# Ejecutar la creación al iniciar la app
+init_db()
+>>>>>>> b0a06b7 (Agregar creacion automatica de tablas con init_db)
 
 
 @app.route("/")
