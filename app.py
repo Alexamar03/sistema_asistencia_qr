@@ -8,6 +8,7 @@ from flask import Flask, jsonify, render_template, request, send_file
 import psycopg2
 from psycopg2.extras import RealDictCursor
 import qrcode
+import traceback
 
 app = Flask(__name__)
 
@@ -44,7 +45,7 @@ def escanear():
 # Ruta para crear el evento y generar su código QR único con IP automática
 @app.route("/crear-evento", methods=["POST"])
 def crear_evento():
-  datos = request.json
+ datos = request.get_json(silent=True) or request.form
   titulo = datos.get("titulo")
   descripcion = datos.get("descripcion")
   fecha_evento = datos.get("fecha_evento")
