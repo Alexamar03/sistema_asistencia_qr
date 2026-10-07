@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Registro de Asistencia</title>
+    <!-- Usamos Bootstrap para que se vea limpio y profesional rápido -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body class="bg-light">
+
+    <div class="container mt-5">
+        <div class="row justify-content-center">
+            <div class="col-md-6">
+                <div class="card shadow">
+                    <div class="card-body p-4">
+                        <h3 class="text-center mb-4">Registro de Asistencia</h3>
+                        
+                        <div id="mensaje-alerta"></div>
+
+                        <form id="form-asistencia">
+                            <!-- Campo oculto para atrapar el token del QR desde la URL -->
+                            <input type="hidden" id="token_qr">
+
+                            <div class="mb-3">
+                                <label for="nombre" class="form-label">Nombre Completo:</label>
+                                <input type="text" class="form-control" id="nombre" required placeholder="Ej. Juan Pérez López">
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="correo" class="form-label">Correo Institucional:</label>
+                                <input type="email" class="form-control" id="correo" required placeholder="tu_correo@unach.mx">
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="carrera" class="form-label">Carrera:</label>
+                                <select class="form-select" id="carrera" required>
+                                    <option value="" selected disabled>Selecciona tu carrera...</option>
+                                    <option value="Ingeniería en Desarrollo y Tecnología de Software">Ingeniería en Desarrollo y Tecnología de Software</option>
+                                    <option value="Ingeniería en Sistemas Computacionales">Ingeniería en Sistemas Computacionales</option>
+                                    <option value="Otra">Otra</option>
+                                </select>
+                            </div>
+
+                            <button type="submit" class="btn btn-primary w-100">Registrar mi Asistencia</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 1. Al cargar la página, capturamos el token que viene en la URL (ej. ?token=uuid-123)
+        const urlParams = new URLSearchParams(window.location.search);
+        const token = urlParams.get('token');
+
+        if (token) {
+            document.getElementById('token_qr').value = token;
+        } else {
+            document.getElementById('mensaje-alerta').innerHTML = `
+                <div class="alert alert-danger">Error: No se encontró el código QR del evento en el enlace.</div>
+            `;
+            document.querySelector('button[type="submit"]').disabled = true;
+        }
+
+        // 2. Manejar el envío del formulario mediante fetch hacia Flask
+        document.getElementById('form-asistencia').addEventListener('submit', async function(e) {
+            e.preventDefault();
+
+            const datos = {
+                token_qr: document.getElementById('token_qr').value,
+                nombre: document.getElementById('nombre').value,
+                correo: document.getElementById('correo').value,
+                carrera: document.getElementById('carrera').value
+            };
+
+            try {
+                const respuesta = await fetch('/registrar-asistencia', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(datos)
+                });
+
+                const resultado = await respuesta.json();
+                const alertaDiv = document.getElementById('mensaje-alerta');
+
+                if (respuesta.ok) {
+                    alertaDiv.innerHTML = `<div class="alert alert-success">${resultado.mensaje}</div>`;
+                    document.getElementById('form-asistencia').reset();
+                } else {
+                    alertaDiv.innerHTML = `<div class="alert alert-danger">${resultado.error}</div>`;
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                document.getElementById('mensaje-alerta').innerHTML = `
+                    <div class="alert alert-danger">Ocurrió un error al conectar con el servidor.</div>
+                `;
+            }
+        });
+    </script>
+</body>
+</html>
