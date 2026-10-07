@@ -12,20 +12,22 @@ import qrcode
 app = Flask(__name__)
 
 # Configuración de la Base de Datos PostgreSQL
-DB_HOST = "localhost"
-DB_NAME = "sistema_asistencia"
-DB_USER = "postgres"
-DB_PASSWORD = "tu_password"
-
-
 def get_db_connection():
-  conn = psycopg2.connect(
-      host=DB_HOST,
-      database=DB_NAME,
-      user=DB_USER,
-      password=DB_PASSWORD,
-      cursor_factory=RealDictCursor,
-  )
+  # Render busca automáticamente la variable 'DATABASE_URL' en la nube
+  database_url = os.environ.get("DATABASE_URL")
+
+  if database_url:
+    # Conexión automática cuando está publicado en Render
+    conn = psycopg2.connect(database_url, cursor_factory=RealDictCursor)
+  else:
+    # Conexión local para cuando lo pruebes en tu propia computadora
+    conn = psycopg2.connect(
+        host="localhost",
+        database="db_asistencias_jjsz",  # El nombre que te dio Render
+        user="db_asistencias_jjsz_user",  # El usuario que te dio Render
+        password="",  # Pon tu contraseña local de postgres si la usas en tu compu
+        cursor_factory=RealDictCursor,
+    )
   return conn
 
 
