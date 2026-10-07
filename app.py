@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timezone, timedelta
 import io
 import os
 import os.path
@@ -189,12 +189,16 @@ def registrar_asistencia():
                 400,
             )
 
+        # Calcular la hora exacta de México (UTC-6)
+        mexico_tz = timezone(timedelta(hours=-6))
+        hora_mexico = datetime.now(mexico_tz).strftime('%Y-%m-%d %H:%M:%S')
+
         cur.execute(
             """
-                INSERT INTO asistencias (evento_id, nombre_alumno, correo_alumno, carrera, ip_dispositivo)
-                VALUES (%s, %s, %s, %s, %s);
+                INSERT INTO asistencias (evento_id, nombre_alumno, correo_alumno, carrera, fecha_registro, ip_dispositivo)
+                VALUES (%s, %s, %s, %s, %s, %s);
             """,
-            (evento_id, nombre_alumno, correo_alumno, carrera, ip_dispositivo),
+            (evento_id, nombre_alumno, correo_alumno, carrera, hora_mexico, ip_dispositivo),
         )
 
         conn.commit()
