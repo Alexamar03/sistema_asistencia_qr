@@ -17,7 +17,6 @@ def get_db_connection():
     # Render busca automáticamente la variable 'DATABASE_URL' en la nube
     database_url = os.environ.get("DATABASE_URL")
 
-<<<<<<< HEAD
     if database_url:
         # Conexión automática cuando está publicado en Render
         conn = psycopg2.connect(database_url, cursor_factory=RealDictCursor)
@@ -25,26 +24,12 @@ def get_db_connection():
         # Conexión local para cuando lo pruebes en tu propia computadora
         conn = psycopg2.connect(
             host="localhost",
-            database="db_asistencias_jjsz",  # El nombre que te dio Render
-            user="db_asistencias_jjsz_user",  # El usuario que te dio Render
-            password="",  # Pon tu contraseña local de postgres si la usas en tu compu
+            database="db_asistencias_jjsz",
+            user="db_asistencias_jjsz_user",
+            password="",
             cursor_factory=RealDictCursor,
         )
     return conn
-=======
-  if database_url:
-    # Conexión automática cuando está publicado en Render
-    conn = psycopg2.connect(database_url, cursor_factory=RealDictCursor)
-  else:
-    # Conexión local para cuando lo pruebes en tu propia computadora
-    conn = psycopg2.connect(
-        host="localhost",
-        database="db_asistencias_jjsz",  # El nombre que te dio Render
-        user="db_asistencias_jjsz_user",  # El usuario que te dio Render
-        password="",  # Pon tu contraseña local de postgres si la usas en tu compu
-        cursor_factory=RealDictCursor,
-    )
-  return conn
 def init_db():
     conn = get_db_connection()
     cur = conn.cursor()
@@ -82,7 +67,6 @@ def init_db():
 
 # Ejecutar la creación al iniciar la app
 init_db()
->>>>>>> b0a06b7 (Agregar creacion automatica de tablas con init_db)
 
 
 @app.route("/")
